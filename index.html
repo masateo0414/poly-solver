@@ -17,32 +17,47 @@
             --color-4: #a855f7; /* P5: 紫 */
         }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        
+        /* 画面全体をスクロール禁止にし、タイトに配置 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding: 8px;
+            padding: 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden; /* スクロールを完全に禁止 */
         }
-        h2 { font-size: 1.1rem; margin: 4px 0; text-align: center; width: 100%; max-width: 360px; display: flex; justify-content: space-between; align-items: center;}
+        
+        h2 { 
+            font-size: 0.9rem; 
+            margin: 2px 0; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 360px; 
+            color: #aaa;
+        }
+        
         .section {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 6px;
+            margin-bottom: 4px;
             width: 100%;
             max-width: 360px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.4);
         }
+        
+        /* 【重要】メイン盤面を180pxにギュッと縮小 */
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
+            gap: 3px;
             width: 100%;
+            max-width: 170px;
             aspect-ratio: 1;
             margin: 0 auto;
             touch-action: none;
@@ -50,12 +65,12 @@
         .cell {
             background-color: #262632;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #ffffff;
             min-width: 0;
             min-height: 0;
@@ -66,11 +81,11 @@
             text-shadow: 0 0 5px #fff;
         }
         
-        /* 【変更】5ピースコンテナを3列指定に変更してサイズアップ */
+        /* 5ピースコンテナ（サイズは極力維持） */
         .pieces-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px 8px; /* 縦方向の隙間を少し広めに */
+            gap: 6px 6px;
             width: 100%;
         }
         .piece-block {
@@ -79,9 +94,9 @@
             align-items: center;
         }
         .piece-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .mini-grid {
             display: grid;
@@ -123,20 +138,27 @@
             to { box-shadow: 0 0 16px #fff, 0 0 25px #fff; }
         }
 
+        /* オプションを最下部にコンパクトに配置 */
+        .control-area {
+            width: 100%;
+            max-width: 360px;
+            margin-top: 2px;
+        }
         .option-group {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: #aaa;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 4px;
         }
-        .option-group input { width: 16px; height: 16px; }
+        .option-group input { width: 14px; height: 14px; }
 
-        .btn-group { display: flex; gap: 8px; width: 100%; max-width: 360px; }
+        .btn-group { display: flex; gap: 6px; width: 100%; }
         .btn {
-            flex: 1; padding: 10px; border: none; border-radius: 8px;
-            font-size: 0.95rem; font-weight: bold; cursor: pointer; color: white;
+            flex: 1; padding: 8px; border: none; border-radius: 6px;
+            font-size: 0.9rem; font-weight: bold; cursor: pointer; color: white;
         }
         .btn-solve { background-color: #2563eb; }
         .btn-clear { background-color: #dc2626; }
@@ -144,26 +166,25 @@
 </head>
 <body>
 
-    <h2><span>🏁 メイン盤面 (1〜5タップ配置)</span></h2>
+    <h2>🏁 メイン盤面 (1〜5配置)</h2>
     <div class="section">
         <div id="main-board" class="grid"></div>
     </div>
 
-    <div class="section" style="padding: 6px;">
-        <div class="option-group">
-            <input type="checkbox" id="allow-transform" checked>
-            <label for="allow-transform">ピースの回転・反転を許可</label>
-        </div>
-    </div>
-
-    <h2><span>✍️ ピース入力 (なぞる)</span></h2>
+    <h2>✍️ ピース入力 (実際の配置)</h2>
     <div class="section">
         <div id="pieces-wrapper"></div>
     </div>
 
-    <div class="btn-group">
-        <button class="btn btn-clear" onclick="clearAll()">全消去</button>
-        <button class="btn btn-solve" onclick="solvePuzzle()">解く！</button>
+    <div class="control-area">
+        <div class="option-group">
+            <input type="checkbox" id="allow-transform" checked>
+            <label for="allow-transform">ピースの回転・反転を許可</label>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-clear" onclick="clearAll()">全消去</button>
+            <button class="btn btn-solve" onclick="solvePuzzle()">解く！</button>
+        </div>
     </div>
 
     <script>
@@ -192,20 +213,15 @@
             wrapper.className = 'pieces-container';
             wrapper.innerHTML = '';
 
-            // 【変更】指定された通りのレイアウト配列を定義 (nullは空白マス)
-            // 1行目: P1(0), 空白(null), P5(4)
-            // 2行目: P2(1), P3(2), P4(3)
             const layout = [0, null, 4, 1, 2, 3];
 
             layout.forEach(p => {
                 if (p === null) {
-                    // 空白用のダミー要素
                     const emptyBlock = document.createElement('div');
                     wrapper.appendChild(emptyBlock);
                     return;
                 }
 
-                // 実際のピース入力グリッド生成
                 const block = document.createElement('div');
                 block.className = 'piece-block';
                 block.innerHTML = `<div class="piece-label" style="color:${colors[p]}">P${p+1}</div>`;
