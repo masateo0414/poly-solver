@@ -3,44 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>5x5 ポリオミノソルバー</title>
+    <title>TA特化型 ポリオミノソルバー</title>
     <style>
         :root {
-            --bg-color: #1e1e24;
-            --card-bg: #2a2a35;
+            --bg-color: #121214;
+            --card-bg: #1a1a24;
             --text-color: #f5f5f7;
-            --border-color: #444455;
-            --color-0: #ef4444; /* ピース1: 赤 */
-            --color-1: #3b82f6; /* ピース2: 青 */
-            --color-2: #22c55e; /* ピース3: 緑 */
-            --color-3: #eab308; /* ピース4: 黄 */
-            --color-4: #a855f7; /* ピース5: 紫 */
+            --border-color: #3a3a4a;
+            --color-0: #ef4444; /* P1: 赤 */
+            --color-1: #3b82f6; /* P2: 青 */
+            --color-2: #22c55e; /* P3: 緑 */
+            --color-3: #eab308; /* P4: 黄 */
+            --color-4: #a855f7; /* P5: 紫 */
         }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding: 10px;
+            padding: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
-        h2 { font-size: 1.2rem; margin-bottom: 6px; text-align: center; }
+        h2 { font-size: 1.1rem; margin: 4px 0; text-align: center; width: 100%; max-width: 360px; display: flex; justify-content: space-between; align-items: center;}
         .section {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
             width: 100%;
             max-width: 360px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
         }
-        /* グリッド共通 */
+        /* メイン盤面：縦も5分割に固定 */
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
             gap: 4px;
             width: 100%;
             aspect-ratio: 1;
@@ -48,76 +49,99 @@
             touch-action: none;
         }
         .cell {
-            background-color: #3a3a4a;
+            background-color: #262632;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            transition: background-color 0.1s;
-        }
-        /* エディタ用のスタイル */
-        #editor .cell.active { background-color: #e2e8f0; }
-        /* セレクター（ピース切り替え） */
-        .selector {
             display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: #ffffff;
+            min-width: 0; /* 文字による変形防止 */
+            min-height: 0;
         }
-        .p-btn {
-            flex: 1;
-            margin: 0 2px;
-            padding: 8px 0;
-            border: none;
-            border-radius: 6px;
-            background: #3a3a4a;
-            color: #fff;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
+        /* メイン盤面の数字表示 */
+        .cell.target-num {
+            background-color: #4b5563;
+            border-color: #9ca3af;
+            text-shadow: 0 0 5px #fff;
         }
-        .p-btn.active {
-            box-shadow: 0 0 0 3px #fff;
-        }
-        .p-btn:nth-child(1) { background-color: var(--color-0); }
-        .p-btn:nth-child(2) { background-color: var(--color-1); }
-        .p-btn:nth-child(3) { background-color: var(--color-2); }
-        .p-btn:nth-child(4) { background-color: var(--color-3); }
-        .p-btn:nth-child(5) { background-color: var(--color-4); }
         
-        .status-text {
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 6px;
-            color: #aaa;
+        /* 5ピース並列レイアウト */
+        .pieces-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            width: 100%;
         }
-        /* オプション設定 */
+        .piece-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .piece-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        /* ミニ盤面：縦も5分割に固定 */
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 2px;
+            width: 100%;
+            aspect-ratio: 1;
+        }
+        .m-cell {
+            background-color: #22222a;
+            border: 1px solid #333344;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #fff;
+            min-width: 0; /* 文字による変形防止 */
+            min-height: 0;
+        }
+        /* ピース描画色 */
+        .p0-active { background-color: var(--color-0); }
+        .p1-active { background-color: var(--color-1); }
+        .p2-active { background-color: var(--color-2); }
+        .p3-active { background-color: var(--color-3); }
+        .p4-active { background-color: var(--color-4); }
+        
+        /* 読むべき場所が激しく光るエフェクト */
+        .m-cell.hit {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            box-shadow: 0 0 12px #ffffff;
+            font-size: 0.9rem;
+            animation: pulse 1s infinite alternate;
+            line-height: 1;
+        }
+        @keyframes pulse {
+            from { box-shadow: 0 0 6px #fff; }
+            to { box-shadow: 0 0 16px #fff, 0 0 25px #fff; }
+        }
+
         .option-group {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            padding: 4px 0;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #aaa;
         }
-        .option-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        /* ボタン類 */
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            max-width: 360px;
-        }
+        .option-group input { width: 16px; height: 16px; }
+
+        .btn-group { display: flex; gap: 8px; width: 100%; max-width: 360px; }
         .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
+            flex: 1; padding: 10px; border: none; border-radius: 8px;
+            font-size: 0.95rem; font-weight: bold; cursor: pointer; color: white;
         }
         .btn-solve { background-color: #2563eb; }
         .btn-clear { background-color: #dc2626; }
@@ -125,165 +149,212 @@
 </head>
 <body>
 
-    <h2>🧩 解答ボード (結果)</h2>
+    <h2><span>🏁 メイン盤面 (1〜5タップ配置)</span></h2>
     <div class="section">
-        <div id="result" class="grid"></div>
+        <div id="main-board" class="grid"></div>
     </div>
 
-    <div class="section">
+    <div class="section" style="padding: 6px;">
         <div class="option-group">
             <input type="checkbox" id="allow-transform" checked>
-            <label for="allow-transform">ピースの回転・反転を許可する</label>
+            <label for="allow-transform">ピースの回転・反転を許可</label>
         </div>
     </div>
 
-    <h2>✍️ ピース入力 (なぞって描く)</h2>
+    <h2><span>✍️ ピース入力 (なぞる)</span></h2>
     <div class="section">
-        <div id="editor" class="grid"></div>
-        <div class="selector">
-            <button class="p-btn active" onclick="switchPiece(0)">P1</button>
-            <button class="p-btn" onclick="switchPiece(1)">P2</button>
-            <button class="p-btn" onclick="switchPiece(2)">P3</button>
-            <button class="p-btn" onclick="switchPiece(3)">P4</button>
-            <button class="p-btn" onclick="switchPiece(4)">P5</button>
-        </div>
-        <div id="status" class="status-text">ピース1: 0マス (目標: 5マス)</div>
+        <div id="pieces-wrapper"></div>
     </div>
 
     <div class="btn-group">
-        <button class="btn btn-clear" onclick="clearAllPieces()">全消去</button>
+        <button class="btn btn-clear" onclick="clearAll()">全消去</button>
         <button class="btn btn-solve" onclick="solvePuzzle()">解く！</button>
     </div>
 
     <script>
+        let mainBoardData = Array(25).fill(0); 
         let piecesData = Array.from({length: 5}, () => Array(25).fill(false));
-        let currentPieceIdx = 0;
         
         let isDrawing = false;
-        let drawMode = true; 
+        let drawMode = true;
+        let activePieceIdx = null;
         let lastTargetIndex = null;
 
         const colors = ['var(--color-0)', 'var(--color-1)', 'var(--color-2)', 'var(--color-3)', 'var(--color-4)'];
 
         function init() {
-            const resultBoard = document.getElementById('result');
-            const editorBoard = document.getElementById('editor');
-            
-            resultBoard.innerHTML = '';
-            editorBoard.innerHTML = '';
-
-            for (let i = 0; i < 25; i++) {
-                const rCell = document.createElement('div');
-                rCell.className = 'cell';
-                rCell.id = `r-${i}`;
-                resultBoard.appendChild(rCell);
-
-                const eCell = document.createElement('div');
-                eCell.className = 'cell';
-                eCell.dataset.index = i;
-                editorBoard.appendChild(eCell);
+            const mainBoard = document.getElementById('main-board');
+            mainBoard.innerHTML = '';
+            for(let i=0; i<25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.addEventListener('pointerdown', handleMainBoardTap);
+                mainBoard.appendChild(cell);
             }
-            updateEditorUI();
+
+            const wrapper = document.getElementById('pieces-wrapper');
+            wrapper.className = 'pieces-container';
+            wrapper.innerHTML = '';
+            for(let p=0; p<5; p++) {
+                const block = document.createElement('div');
+                block.className = 'piece-block';
+                block.innerHTML = `<div class="piece-label" style="color:${colors[p]}">P${p+1}</div>`;
+                
+                const miniGrid = document.createElement('div');
+                miniGrid.className = 'mini-grid';
+                miniGrid.dataset.pieceIdx = p;
+
+                for(let i=0; i<25; i++) {
+                    const mCell = document.createElement('div');
+                    mCell.className = 'm-cell';
+                    mCell.dataset.cellIdx = i;
+                    miniGrid.appendChild(mCell);
+                }
+                block.appendChild(miniGrid);
+                wrapper.appendChild(block);
+            }
+
             setupPointerEvents();
+            updateUI();
+        }
+
+        function handleMainBoardTap(e) {
+            const idx = parseInt(e.target.dataset.index);
+            if (mainBoardData[idx] > 0) {
+                mainBoardData[idx] = 0;
+            } else {
+                for (let num = 1; num <= 5; num++) {
+                    if (!mainBoardData.includes(num)) {
+                        mainBoardData[idx] = num;
+                        break;
+                    }
+                }
+            }
+            updateUI();
         }
 
         function setupPointerEvents() {
-            const editor = document.getElementById('editor');
+            window.addEventListener('pointerdown', (e) => {
+                const miniGrid = e.target.closest('.mini-grid');
+                const mCell = e.target.closest('.m-cell');
+                if (!miniGrid || !mCell) return;
 
-            editor.addEventListener('pointerdown', (e) => {
-                const cell = e.target.closest('#editor .cell');
-                if (!cell) return;
                 isDrawing = true;
-                const idx = parseInt(cell.dataset.index);
-                drawMode = !piecesData[currentPieceIdx][idx];
-                lastTargetIndex = idx;
-                toggleCell(idx, drawMode);
-                cell.releasePointerCapture(e.pointerId);
+                activePieceIdx = parseInt(miniGrid.dataset.pieceIdx);
+                const cIdx = parseInt(mCell.dataset.cellIdx);
+                
+                drawMode = !piecesData[activePieceIdx][cIdx]; 
+                lastTargetIndex = cIdx;
+                
+                piecesData[activePieceIdx][cIdx] = drawMode;
+                updateUI();
+                mCell.releasePointerCapture(e.pointerId);
             });
 
-            editor.addEventListener('pointermove', (e) => {
-                if (!isDrawing) return;
+            window.addEventListener('pointermove', (e) => {
+                if (!isDrawing || activePieceIdx === null) return;
                 const target = document.elementFromPoint(e.clientX, e.clientY);
                 if (!target) return;
-                const cell = target.closest('#editor .cell');
-                if (!cell) return;
-                const idx = parseInt(cell.dataset.index);
                 
-                if (idx !== lastTargetIndex) {
-                    lastTargetIndex = idx;
-                    toggleCell(idx, drawMode);
+                const miniGrid = target.closest('.mini-grid');
+                const mCell = target.closest('.m-cell');
+                if (!miniGrid || !mCell) return;
+                if (parseInt(miniGrid.dataset.pieceIdx) !== activePieceIdx) return; 
+
+                const cIdx = parseInt(mCell.dataset.cellIdx);
+                if (cIdx !== lastTargetIndex) {
+                    lastTargetIndex = cIdx;
+                    piecesData[activePieceIdx][cIdx] = drawMode;
+                    updateUI();
                 }
             });
 
-            const stopDrawing = () => { isDrawing = false; lastTargetIndex = null; };
+            const stopDrawing = () => { isDrawing = false; activePieceIdx = null; lastTargetIndex = null; };
             window.addEventListener('pointerup', stopDrawing);
             window.addEventListener('pointercancel', stopDrawing);
         }
 
-        function toggleCell(idx, mode) {
-            piecesData[currentPieceIdx][idx] = mode;
-            updateEditorUI();
-        }
-
-        function updateEditorUI() {
-            const cells = document.querySelectorAll('#editor .cell');
-            const currentData = piecesData[currentPieceIdx];
-            let count = 0;
-
-            cells.forEach((cell, idx) => {
-                if (currentData[idx]) {
-                    cell.classList.add('active');
-                    cell.style.backgroundColor = colors[currentPieceIdx];
+        function updateUI() {
+            const cells = document.querySelectorAll('#main-board .cell');
+            cells.forEach((cell, i) => {
+                const val = mainBoardData[i];
+                cell.className = 'cell';
+                if(val > 0) {
+                    cell.classList.add('target-num');
+                    cell.innerText = val;
                 } else {
-                    cell.classList.remove('active');
-                    cell.style.backgroundColor = '';
+                    cell.innerText = '';
                 }
             });
 
-            currentData.forEach(v => { if(v) count++; });
-            document.getElementById('status').innerText = `ピース${currentPieceIdx + 1}: ${count}マス (目標: 5マス)`;
-        }
-
-        function switchPiece(idx) {
-            currentPieceIdx = idx;
-            document.querySelectorAll('.p-btn').forEach((btn, i) => {
-                btn.classList.toggle('active', i === idx);
-            });
-            updateEditorUI();
-        }
-
-        // 【変更】確認ダイアログ（confirm）を削除して一瞬で消去
-        function clearAllPieces() {
-            piecesData = Array.from({length: 5}, () => Array(25).fill(false));
-            updateEditorUI();
-            for (let i = 0; i < 25; i++) {
-                document.getElementById(`r-${i}`).style.backgroundColor = '';
+            for(let p=0; p<5; p++) {
+                const mCells = document.querySelectorAll(`.mini-grid[data-piece-idx="${p}"] .m-cell`);
+                mCells.forEach((cell, i) => {
+                    if (!cell.classList.contains('hit')) {
+                        cell.innerText = '';
+                        cell.className = 'm-cell';
+                    } else {
+                        cell.className = 'm-cell hit';
+                    }
+                    if(piecesData[p][i]) {
+                        cell.classList.add(`p${p}-active`);
+                    }
+                });
             }
+        }
+
+        function clearAll() {
+            mainBoardData.fill(0);
+            piecesData = Array.from({length: 5}, () => Array(25).fill(false));
+            document.querySelectorAll('.m-cell').forEach(c => {
+                c.classList.remove('hit');
+                c.innerText = '';
+            });
+            updateUI();
         }
 
         function generateVariants(coords, allowTransform) {
-            const variants = new Set();
+            const variants = [];
             const transforms = allowTransform ? [
                 (x, y) => [x, y],       (x, y) => [-y, x],    (x, y) => [-x, -y],   (x, y) => [y, -x],
                 (x, y) => [-x, y],      (x, y) => [y, x],     (x, y) => [x, -y],    (x, y) => [-y, -x]
-            ] : [
-                (x, y) => [x, y]
-            ];
+            ] : [(x, y) => [x, y]];
 
-            for (const t of transforms) {
-                let trans = coords.map(([x, y]) => t(x, y));
-                let minY = Math.min(...trans.map(c => c[1]));
-                let minX = Math.min(...trans.filter(c => c[1] === minY).map(c => c[0]));
+            for (let tIdx = 0; tIdx < transforms.length; tIdx++) {
+                const t = transforms[tIdx];
+                let trans = coords.map(({x, y, origIdx}) => {
+                    const [nx, ny] = t(x, y);
+                    return {x: nx, y: ny, origIdx};
+                });
                 
-                let norm = trans.map(([x, y]) => [x - minX, y - minY]);
-                norm.sort((a, b) => a[1] !== b[1] ? a[1] - b[1] : a[0] - b[0]);
+                let minY = Math.min(...trans.map(c => c.y));
+                let minX = Math.min(...trans.filter(c => c.y === minY).map(c => c.x));
                 
-                variants.add(norm.map(([x, y]) => `${x},${y}`).join(';'));
+                let norm = trans.map(c => ({x: c.x - minX, y: c.y - minY, origIdx: c.origIdx}));
+                norm.sort((a, b) => a.y !== b.y ? a.y - b.y : a.x - b.x);
+                
+                const key = norm.map(c => `${c.x},${c.y}`).join(';');
+                if(!variants.some(v => v.key === key)) {
+                    variants.push({ key, coords: norm });
+                }
             }
-            return Array.from(variants).map(str => str.split(';').map(c => c.split(',').map(Number)));
+            return variants;
         }
 
         function solvePuzzle() {
+            document.querySelectorAll('.m-cell').forEach(c => {
+                c.classList.remove('hit');
+                c.innerText = '';
+            });
+
+            for(let num=1; num<=5; num++) {
+                if(!mainBoardData.includes(num)) {
+                    alert(`メイン盤面に数字の "${num}" が配置されていません！`);
+                    return;
+                }
+            }
+
             let totalCells = 0;
             const formattedPieces = [];
             const allowTransform = document.getElementById('allow-transform').checked;
@@ -291,10 +362,12 @@
             for (let i = 0; i < 5; i++) {
                 const coords = [];
                 for (let j = 0; j < 25; j++) {
-                    if (piecesData[i][j]) coords.push([j % 5, Math.floor(j / 5)]);
+                    if (piecesData[i][j]) {
+                        coords.push({ x: j % 5, y: Math.floor(j / 5), origIdx: j });
+                    }
                 }
                 if (coords.length === 0) {
-                    alert(`ピース ${i + 1} が白紙です！`);
+                    alert(`ピース P${i + 1} が未入力です！`);
                     return;
                 }
                 totalCells += coords.length;
@@ -302,13 +375,14 @@
             }
 
             if (totalCells !== 25) {
-                alert(`マスの総数が ${totalCells} 個です。5x5=25マスぴったりにしてください！`);
+                alert(`描かれたマスの総数が ${totalCells} 個です。5x5=25マスぴったりにしてください！`);
                 return;
             }
 
             const board = Array(25).fill(-1);
             const used = Array(5).fill(false);
-            
+            let finalPlacement = Array(5); 
+
             function backtrack(index) {
                 if (index === 25) return true;
                 if (board[index] !== -1) return backtrack(index + 1);
@@ -322,9 +396,9 @@
 
                     for (const variant of formattedPieces[p].variants) {
                         let canPlace = true;
-                        for (const [dx, dy] of variant) {
-                            const nr = r + dy;
-                            const nc = c + dx;
+                        for (const pt of variant.coords) {
+                            const nr = r + pt.y;
+                            const nc = c + pt.x;
                             if (nr < 0 || nr >= 5 || nc < 0 || nc >= 5 || board[nr * 5 + nc] !== -1) {
                                 canPlace = false;
                                 break;
@@ -332,9 +406,12 @@
                         }
 
                         if (canPlace) {
-                            for (const [dx, dy] of variant) board[(r + dy) * 5 + (c + dx)] = p;
+                            for (const pt of variant.coords) board[(r + pt.y) * 5 + (c + pt.x)] = p;
+                            finalPlacement[p] = { startR: r, startC: c, coords: variant.coords };
+
                             if (backtrack(index + 1)) return true;
-                            for (const [dx, dy] of variant) board[(r + dy) * 5 + (c + dx)] = -1;
+
+                            for (const pt of variant.coords) board[(r + pt.y) * 5 + (c + pt.x)] = -1;
                         }
                     }
                     used[p] = false;
@@ -343,12 +420,29 @@
             }
 
             if (backtrack(0)) {
-                for (let i = 0; i < 25; i++) {
-                    const pIdx = board[i];
-                    document.getElementById(`r-${i}`).style.backgroundColor = colors[pIdx];
+                for (let num = 1; num <= 5; num++) {
+                    const boardIdx = mainBoardData.indexOf(num); 
+                    const br = Math.floor(boardIdx / 5);
+                    const bc = boardIdx % 5;
+                    const pIdx = board[boardIdx]; 
+
+                    const placement = finalPlacement[pIdx];
+                    const matchedCoord = placement.coords.find(pt => {
+                        return (placement.startR + pt.y === br) && (placement.startC + pt.x === bc);
+                    });
+
+                    if (matchedCoord) {
+                        const origCellIdx = matchedCoord.origIdx;
+                        const targetCell = document.querySelector(`.mini-grid[data-piece-idx="${pIdx}"] .m-cell[data-cell-idx="${origCellIdx}"]`);
+                        if (targetCell) {
+                            targetCell.classList.add('hit');
+                            targetCell.innerText = num; 
+                        }
+                    }
                 }
+                updateUI();
             } else {
-                alert("解が見つかりませんでした！ピースの向きや形を確認してください。");
+                alert("解が見つかりませんでした！ピースの形や向きを確認してください。");
             }
         }
 
